@@ -27,7 +27,7 @@ timeButtons.forEach(function(button) {
 const bookButton = document.getElementById("book-button");
 const confirmation = document.getElementById("confirmation");
 
-bookButton.addEventListener("click", function() {
+bookButton.addEventListener("click", async function() {
 
     const selectedDay = document.querySelector("#day-options .selected");
     const selectedTime = document.querySelector("#time-options .selected");
@@ -39,10 +39,45 @@ bookButton.addEventListener("click", function() {
         return;
     }
 
-    confirmation.innerHTML = `
-        <h2>🎉 Appointment Confirmed!</h2>
-        <p><strong>${selectedDay.innerText} at ${selectedTime.innerText} ❤️</strong></p>
-        <p>Reason: ${reason}</p>
-        <p>I'll be expecting your call 😌📞</p>
-    `;
+    bookButton.disabled = true;
+    bookButton.innerText = "Booking... ❤️";
+
+    try {
+
+        const response = await fetch("https://formspree.io/f/xkjgjrye", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                day: selectedDay.innerText,
+                time: selectedTime.innerText,
+                reason: reason
+            })
+        });
+
+        if (response.ok) {
+
+            confirmation.innerHTML = `
+                <h2>🎉 Appointment Confirmed!</h2>
+                <p><strong>${selectedDay.innerText} at ${selectedTime.innerText} ❤️</strong></p>
+                <p>Reason: ${reason}</p>
+                <p>I'll be expecting your call 😌📞</p>
+            `;
+
+        } else {
+            confirmation.innerHTML =
+                "<p>Something went wrong. Please try again ❤️</p>";
+        }
+
+    } catch (error) {
+
+        confirmation.innerHTML =
+            "<p>Something went wrong. Please try again ❤️</p>";
+
+    }
+
+    bookButton.disabled = false;
+    bookButton.innerText = "Book My Call ❤️";
 });
